@@ -2,7 +2,8 @@
 #define distancesensor_h
 
 #include "Arduino.h"
-#include "Servo.h"
+#include <Servo.h>
+#include <pt.h>
 
 /**
  * Library that allows the management of the hc-sr04 ultrasonic sensor 
