@@ -1,0 +1,28 @@
+#ifndef photosensor_h
+#define photosensor_h
+
+#include "Arduino.h"
+
+/**
+ * Photo Sensor is a library that wraps the operation of the 
+ * LDR sensor, for easy use.
+ */
+class Photosensor{
+    
+  private:
+    int _ldr;
+    int _actuator;
+    int _edgeValue = 200;
+
+    int readSensor();
+    void turnOn();
+    void turnOff();
+    void setEdgeValue(int value);
+
+  public:
+    Photosensor(int ldr_pin, int actuator_pin);
+    void execute();
+    
+};
+
+#endif
