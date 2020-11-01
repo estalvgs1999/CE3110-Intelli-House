@@ -1,5 +1,6 @@
 #include "photosensor.h"
 #include "Arduino.h"
+#include <pt.h>
 
 /**
  * Constructor
