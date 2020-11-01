@@ -42,10 +42,21 @@ void Photosensor::turnOff(){
  * Main routine controller, reads sensor and turns 
  * on actuator if value is less than allowable value.
  */
-void Photosensor::execute(){
-  if(readSensor() < _edgeValue){
-    turnOn();
-  }else{
-    turnOff();
+void Photosensor::run(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  while(true){
+    int value = readSensor();
+    t = millis();
+    PT_WAIT_WHILE(pt,((millis()-t) < 100));
+
+    if(value < _edgeValue){
+      turnOn();
+    }else{
+      turnOff();
+    }
+    PT_YIELD(pt);
   }
+  PT_END(pt);
 }
