@@ -14,15 +14,14 @@ class DistanceSensor{
   private:
     int _trig;
     int _echo;
-    int _servoPin;
-    Servo servo;
+    Servo _servo;
     
-    void moveServo();
+    void moveServo(int angle);
+    long calculateDistance(int time);
 
   public:
     DistanceSensor(int trigPin, int echoPin, int servo);
-    int calculateDistance();
-
+    void run(struct pt *pt);
 };
 
 #endif
