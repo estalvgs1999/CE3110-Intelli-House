@@ -10,8 +10,8 @@
  */
 class MotionSensor{
   private:
-    const int _pir;
-    const int _led;
+    int _pir;
+    int _led;
     bool pirState = false;
 
   public:
