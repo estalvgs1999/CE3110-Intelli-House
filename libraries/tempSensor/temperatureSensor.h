@@ -13,7 +13,7 @@ class Temperature{
     int _tpm;
     int _actuator;
     int _tmpLimit;
-    dht11 _sensor;i
+    dht11 _sensor;
     
     int readSensor();
     void turnOn();
