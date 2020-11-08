@@ -12,14 +12,6 @@ Temperature::Temperature(int tmpPin, int actuatorPin){
 /**
  *
  */
-int Temperature::readSensor(){
-  int value = _sensor.read(_tmp);
-  return value.temperature;
-}
-
-/**
- *
- */
 void Temperature::turnOn(){
   digitalWrite(_actuator,HIGH);
 }
@@ -41,9 +33,14 @@ void Temperature::setTemperatureLimit(int limit){
 void Temperature::run(struct pt *pt){
   PT_BEGIN(pt);
   static long t = 0;
+  byte temp = 0;
+  byte hum = 0;
+  SimpleDHT11 sensor(_tmp);
 
   while(true){
-    if(readSensor() > _tmpLimit){
+    
+    sensor.read(&temp, &hum, NULL);
+    if(int(temp) > _tmpLimit){
       turnOn();
     }else{
       turnOff();

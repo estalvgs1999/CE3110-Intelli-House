@@ -1,8 +1,8 @@
-#ifndef temperature_sensor.h
-#define temperature_sensor
+#ifndef temperaturesensor_h
+#define temperaturesensor_h
 
 #include "Arduino.h"
-#include <dht11.h>
+#include <SimpleDHT.h>
 #include <pt.h>
 
 /**
@@ -13,9 +13,7 @@ class Temperature{
     int _tpm;
     int _actuator;
     int _tmpLimit;
-    dht11 _sensor;
     
-    int readSensor();
     void turnOn();
     void turnOff();
 
