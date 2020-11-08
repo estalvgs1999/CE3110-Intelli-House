@@ -10,7 +10,7 @@
  */
 class Temperature{
   private:
-    int _tpm;
+    int _tmp;
     int _actuator;
     int _tmpLimit;
     

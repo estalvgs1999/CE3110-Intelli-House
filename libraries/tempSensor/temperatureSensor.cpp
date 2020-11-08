@@ -1,7 +1,9 @@
 #include "temperatureSensor.h"
 
 /**
- *
+ * Constructor
+ * @param int tmpPin
+ * @param int actuatorPin
  */
 Temperature::Temperature(int tmpPin, int actuatorPin){
   _tmp = tmpPin;
@@ -10,7 +12,8 @@ Temperature::Temperature(int tmpPin, int actuatorPin){
 }
 
 /**
- *
+ * Turns on or off an actuator, it can be a control 
+ * for a motor or a relay
  */
 void Temperature::turnOn(){
   digitalWrite(_actuator,HIGH);
@@ -21,14 +24,17 @@ void Temperature::turnOff(){
 }
 
 /**
- *
+ * Allows you to customize the limit temperature value
+ * @param int newLimit
  */
-void Temperature::setTemperatureLimit(int limit){
-  _tmpLimit = limit;
+void Temperature::setTemperatureLimit(int newLimit){
+  _tmpLimit = newLimit;
 }
 
 /**
- *
+ * Sensor main routine. Check the temperature periodically, if a
+ * read value exceeds the limit temperature an actuator will turn 
+ * on to activate a cooling mechanism.
  */
 void Temperature::run(struct pt *pt){
   PT_BEGIN(pt);
