@@ -1,3 +1,5 @@
+#include <temperatureSensor.h>
+
 // Intelli-House
 // by David Alvarado & Erick Cordero
 #include <distanceSensor.h>
