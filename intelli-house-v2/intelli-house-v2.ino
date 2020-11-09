@@ -28,11 +28,13 @@ struct pt procesoD;
 
 void setup(){
   PT_INIT(&procesoA);
+  PT_INIT(&procesoB);
 }
 
 
 void loop(){
   fotosensor(&procesoA);
+  sensorMovimiento(&procesoB);
 }
 
 /**
