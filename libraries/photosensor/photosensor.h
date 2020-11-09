@@ -18,11 +18,12 @@ class Photosensor{
     int readSensor();
     void turnOn();
     void turnOff();
-    void setEdgeValue(int value);
-
+    
   public:
     Photosensor(int ldr_pin, int actuator_pin);
     void run(struct pt *pt);
+    void setEdgeValue(int value);
+
     
 };
 

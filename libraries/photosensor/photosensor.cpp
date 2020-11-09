@@ -46,15 +46,17 @@ void Photosensor::run(struct pt *pt){
   static long t = 0;
 
   while(true){
+    turnOff();
     int value = readSensor();
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 100));
-
+    Serial.println(value);
+    
     if(value < _edgeValue){
       turnOn();
-    }else{
-      turnOff();
     }
+    
+    t = millis();
+    PT_WAIT_WHILE(pt,((millis()-t) < 200));
+
     PT_YIELD(pt);
   }
   PT_END(pt);
