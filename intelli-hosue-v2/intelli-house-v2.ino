@@ -53,10 +53,8 @@ void fotosensor(struct pt *pt){
     digitalWrite(LED_PATIO, HIGH);
     
     valor = analogWrite(LDR);
-    
-    if(value < valorLimite){
+    if(value < valorLimite)
       digitalWrite(LED_PATIO, HIGH);
-    }
     
     t = millis();
     PT_WAIT_WHILE(pt,((millis()-t) < 200));
