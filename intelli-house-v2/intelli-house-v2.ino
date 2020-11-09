@@ -50,10 +50,10 @@ void fotosensor(struct pt *pt){
   pinMode(LED_PATIO, HIGH);
 
   while(true){
-    digitalWrite(LED_PATIO, HIGH);
+    digitalWrite(LED_PATIO, LOW);
     
-    valor = analogWrite(LDR);
-    if(value < valorLimite)
+    valor = analogRead(LDR);
+    if(valor < valorLimite)
       digitalWrite(LED_PATIO, HIGH);
     
     t = millis();
@@ -77,4 +77,3 @@ void sensorTemperatura(struct pt *pt){
 }
 
 /***********************/
-
