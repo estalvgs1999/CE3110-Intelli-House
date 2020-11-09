@@ -68,8 +68,34 @@ void sensorDistancia(struct pt *pt){
 
 }
 
+/**
+ * Sensor PIR.
+ * El sensor genera un señal ALTO si hay movimiento.
+ * El led indicador se activa indicando que se ha detectado
+ * movimiento.
+ */
 void sensorMovimiento(struct pt *pt) {
+  PT_BEGIN(pt);
+  static long  t = 0;
+  bool pirState = false;
+
+  pinMode(PIR, INPUT);
+  pinMode(LED_BANO, OUTPUT);
   
+  while(true){
+    pirState = (digitalRead(PIR) == HIGH)? true: false;
+    
+    if(pirState)
+      digitalWrite(LED_BANO, HIGH);
+    else
+      digitalWrite(LED_BANO, LOW);
+    
+    t = millis();
+    PT_WAIT_WHILE(pt,((millis()-t) < 200));
+    
+    PT_YIELD(pt);
+  }
+  PT_END(pt);
 }
 
 void sensorTemperatura(struct pt *pt){
