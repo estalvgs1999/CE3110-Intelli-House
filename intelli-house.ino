@@ -1,47 +1,285 @@
-// Intelli-House
-// by David Alvarado & Erick Cordero
-#include <distanceSensor.h>
-#include <photosensor.h>
+//Bibliotecas
+#include <Servo.h>
+#include <SimpleDHT.h>
 #include <pt.h>
-#include <motionSensor.h>
-#include <temperatureSensor.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <MFRC522.h>
 
-struct pt thread1;
-struct pt thread2;
-struct pt thread3;
-struct pt thread4;
+// Sensores
+#define LDR A0
+#define HC_TRIGGER 48
+#define HC_ECHO 49
+#define PIR 50
+#define DHT 53
+#define RST_PIN  4
+#define SS_PIN  31
 
-Photosensor photosensor(A0,13);
-DistanceSensor distance(6,7,10);
-MotionSensor motion(8,9);
-Temperature tmp(12,14);
+// Salidas Digitales
+#define LED_PATIO 44
+#define LED_BANO 45
+#define ACDC 46
 
-void setup() {
-  photosensor.setEdgeValue(200);
-  PT_INIT(&thread1);
-  PT_INIT(&thread2);
-  PT_INIT(&thread3);
-  PT_INIT(&thread4);
+#define SERVO_GARAGE 5
+#define SERVO_PT1 6
+#define SERVO_PT2 7
+
+#define LED_R1 22
+#define LED_V1 23
+#define LED_R2 24
+#define LED_V2 25
+
+//Bases de datos
+String baseDatos[] = {"C7 52 6B 63","A9 A0 8B C1"};
+int bdSize = sizeof(baseDatos)/sizeof(String);
+String baseDatos2[] = {"C7 52 6B 63","A9 A0 8B C1"};
+int bdSize2 = sizeof(baseDatos2)/sizeof(String);
+
+// Creación de Objetos
+MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+// Hilos
+struct pt procesoA;
+struct pt procesoB;
+struct pt procesoC;
+struct pt procesoD;
+
+// Setup
+void setup(){
+  PT_INIT(&procesoA);
+  PT_INIT(&procesoB);
+
+  Serial.begin(9600);
+  
+  SPI.begin();
+  mfrc522.PCD_Init();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  photosensor.run(&thread1);
-  distance.run(&thread2);
-  motion.run(&thread3);
-  tmp.run(&thread4);
+// Loop
+void loop(){
+  fotosensor(&procesoA);
+  sensorMovimiento(&procesoB);
 }
 
-
-/*
- * void funcion(struct pt *pt){
- *  PT_INIT(pt);
- *  static long t = 0;
- *  
- *  while(true){
- *    // foo();
- *    PT_YIELD(pt);
- *  }
- *  PT_END(pt);
- * }
+/**
+ * Sensor LDR
+ * -----------------------------------------------
+ * Si el valor de la lectura es menor que el de un 
+ * valor límite (indica oscuridad) enciende la 
+ * iluminación. 
  */
+void fotosensor(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  int valor;
+  const int delay = 200;
+  const int valorLimite = 200;
+
+  pinMode(LED_PATIO, HIGH);
+
+  while(true){
+    digitalWrite(LED_PATIO, LOW);
+    
+    valor = analogRead(LDR);
+    if(valor < valorLimite)
+      digitalWrite(LED_PATIO, HIGH);
+    
+    t = millis();
+    PT_WAIT_WHILE(pt,(millis()-t) < delay);
+
+    PT_YIELD(pt);
+  }
+  PT_END(pt);
+}
+
+/**
+ * Sensor Ultrasónico HCSR04
+ * -----------------------------------------------
+ * El sensor mide la distancia en cm.
+ * Cuando la distancia es menor a una distancia d
+ * se activa una salida.
+ */
+void sensorDistancia(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+  const int delay_us = 10 // 10 microsegundos  
+  int distancia;
+  int tiempo;
+
+  pinMode(HC_ECHO, INPUT);
+  pinMode(HC_TRIGGER, OUTPUT);
+  Serial.begin(9600);
+
+  while(true){
+
+    digitalWrite(HC_TRIGGER, HIGH);
+    t = millis();
+    PT_WAIT_WHILE(pt,(millis()-t) < delay_us);
+    digitalWrite(HC_TRIGGER, LOW);
+
+    tiempo = pulseIn(HC_ECHO, HIGH);
+    duracion = duracion * 0.034/2;
+
+    Serial.print("Distancia = ");
+    Serial.print(distancia);
+    Serial.println(" cm");
+
+    PT_YIELD(pt);
+  }
+
+  PT_END(pt);
+}
+
+/**
+ * Sensor PIR
+ * -----------------------------------------------
+ * El sensor genera un señal ALTO si hay movimiento.
+ * El led indicador se activa indicando que se ha 
+ * detectado movimiento.
+ */
+void sensorMovimiento(struct pt *pt) {
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  const int delay = 200;
+  bool pirState = false;
+
+  pinMode(PIR, INPUT);
+  pinMode(LED_BANO, OUTPUT);
+  
+  while(true){
+    pirState = (digitalRead(PIR) == HIGH)? true: false;
+    
+    if(pirState)
+      digitalWrite(LED_BANO, HIGH);
+    else
+      digitalWrite(LED_BANO, LOW);
+    
+    t = millis();
+    PT_WAIT_WHILE(pt,(millis()-t) < delay);
+
+    PT_YIELD(pt);
+  }
+  PT_END(pt);
+}
+
+void sensorTemperatura(struct pt *pt){
+
+}
+
+
+/***********************/
+
+void RFID1(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  while (true){
+    // Revisamos si hay nuevas tarjetas  presentes  
+  if ( mfrc522.PICC_IsNewCardPresent())
+  {  
+    
+    if ( mfrc522.PICC_ReadCardSerial()){
+      
+      String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
+      
+      if(verificarTarjeta(uid))
+        accesoPermitido();
+      else
+        accesoDenegado(); 
+    }
+  }  
+
+    PT_YIELD(pt);
+  }
+
+  PT_END(pt);
+};
+
+void RFID2(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  while (true){
+    // Revisamos si hay nuevas tarjetas  presentes  
+  if ( mfrc522.PICC_IsNewCardPresent())
+  {  
+    
+    if ( mfrc522.PICC_ReadCardSerial()){
+      
+      String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
+      
+      if(verificarTarjeta2(uid))
+        accesoPermitido2();
+      else
+        accesoDenegado2(); 
+    }
+  }  
+
+    PT_YIELD(pt);
+  }
+
+  PT_END(pt);
+};
+
+// Enciende el led verde del sensor 1
+void accesoPermitido(){
+  digitalWrite(LED_V1,HIGH);
+  //milis
+  digitalWrite(LED_V1,LOW);
+}
+
+// Enciende el led rojo del sensor 1
+void accesoDenegado(){
+  digitalWrite(LED_R1,HIGH);
+  //milis
+  digitalWrite(LED_R1,LOW);
+}
+
+// Enciende el led verde del sensor 2
+void accesoPermitido2(){
+  digitalWrite(LED_V2,HIGH);
+  //milis
+  digitalWrite(LED_V2,LOW);
+}
+
+// Enciende el led rojo del sensor 2
+void accesoDenegado2(){
+  digitalWrite(LED_R2,HIGH);
+  //milis
+  digitalWrite(LED_R2,LOW);
+}
+
+// Devuelve el UID de la tarjeta
+String obtenerUID(){
+  String uid = "";
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+    uid.concat(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
+    uid.concat(String(mfrc522.uid.uidByte[i], HEX));
+  }
+  mfrc522.PICC_HaltA();
+  uid.toUpperCase();
+  return uid;
+}
+
+// Verifica si la tarjeta esta en la base de datos
+bool verificarTarjeta(String tarUid){
+  
+  for(int i = 0; i < bdSize; i++){
+    if(tarUid.substring(1) == baseDatos[i])
+      return true;
+  }
+  return false;
+}
+
+// Verifica si la tarjeta esta en la base de datos #2
+bool verificarTarjeta2(String tarUid){
+  
+  for(int i = 0; i < bdSize; i++){
+    if(tarUid.substring(1) == baseDatos2[i])
+      return true;
+  }
+  return false;
+}
