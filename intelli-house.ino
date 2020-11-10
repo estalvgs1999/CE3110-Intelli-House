@@ -9,7 +9,7 @@
 // Sensores
 #define LDR A0
 #define HC_TRIGGER 32
-#define HC_ECHO 33
+#define HC_ECHO 2
 #define PIR 50
 #define DHT 53
 #define RST_PIN  4
@@ -37,6 +37,9 @@ int bdSize2 = sizeof(baseDatos2)/sizeof(String);
 
 // Creación de Objetos
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+
+// Variables globales
+volatile unsigned long LastPulseTime;  
 
 // Hilos
 struct pt procesoA;
@@ -105,22 +108,29 @@ void fotosensor(struct pt *pt){
 void sensorDistancia(struct pt *pt){
   PT_BEGIN(pt);
   const int delay_us = 10; // 10 microsegundos  
-  const int limite = 15; // 15 cm
+  const int limite = 20; // 15 cm
   int distancia;
   int tiempo;
   Servo servo;
+  servo.attach(SERVO_GARAGE);
+
+  attachInterurpt(0, EchoPinISR, CHANGE); // Pin 2
 
   pinMode(HC_ECHO, INPUT);
   pinMode(HC_TRIGGER, OUTPUT);
-  servo.attach(SERVO_GARAGE);
+  
   
   while(true){
+
+    digitalWrite(HC_TRIGGER, LOW);
+    t = micros();
+    PT_WAIT_WHILE(pt,(micros()-t) < 5);
     digitalWrite(HC_TRIGGER, HIGH);
-    //
+    t = micros();
+    PT_WAIT_WHILE(pt,(micros()-t) < delay_us);
     digitalWrite(HC_TRIGGER, LOW);
 
-    tiempo = pulseIn(HC_ECHO, HIGH);
-    distancia = tiempo * 0.034/2;
+    distancia = LastPulseTime/58.2;
 
     if(distancia < limite)
       servo.write(90);
@@ -135,6 +145,21 @@ void sensorDistancia(struct pt *pt){
 
   PT_END(pt);
 }
+
+/**
+ * Sustituye la función síncrosa pulseIn()
+ */
+void EchoPinISR(){
+
+  static unsigned long t;
+
+  if(digitalRead(HC_ECHO))
+    t = micros();
+  else
+    LastPulseTime = micros() - t;
+}
+
+
 
 /**
  * Sensor PIR
