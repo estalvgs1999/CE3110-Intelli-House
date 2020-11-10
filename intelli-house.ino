@@ -134,7 +134,8 @@ void sensorDistancia(struct pt *pt){
 
     if(distancia < limite)
       servo.write(90);
-      
+    else
+      servo.write(0);
 
     Serial.print("Distancia = ");
     Serial.print(distancia);
