@@ -35,7 +35,6 @@ int bdSize = sizeof(baseDatos)/sizeof(String);
 
 // Crear nuestros OBJETOS
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Hilos
 struct pt procesoA;
@@ -145,10 +144,6 @@ void RFID1(struct pt *pt){
     
     if ( mfrc522.PICC_ReadCardSerial()){
       
-      lcd.clear();
-      lcd.print("READING CARD...");
-      delay(2000);
-
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
       
       if(verificarTarjeta(uid))
@@ -175,16 +170,12 @@ void RFID2(struct pt *pt){
     
     if ( mfrc522.PICC_ReadCardSerial()){
       
-      lcd.clear();
-      lcd.print("READING CARD...");
-      delay(2000);
-
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
       
       if(verificarTarjeta(uid))
-        accesoPermitido();
+        accesoPermitido2();
       else
-        accesoDenegado(); 
+        accesoDenegado2(); 
     }
   }  
 
@@ -194,19 +185,34 @@ void RFID2(struct pt *pt){
   PT_END(pt);
 };
 
-// Enciende el led azul e imprime un mensaje en el lcd
+// Enciende el led verde del sensor 1
 void accesoPermitido(){
-  digitalWrite(LED_A,HIGH);
+  digitalWrite(LED_V1,HIGH);
   //milis
-  digitalWrite(LED_A,LOW);
+  digitalWrite(LED_V1,LOW);
 }
 
-// Enciende el led rojo y el buzzer e imprime un mensaje en el lcd
+// Enciende el led rojo del sensor 1
 void accesoDenegado(){
-  digitalWrite(LED_R,HIGH);
+  digitalWrite(LED_R1,HIGH);
   //milis
-  digitalWrite(LED_R,LOW);
+  digitalWrite(LED_R1,LOW);
 }
+
+// Enciende el led verde del sensor 2
+void accesoPermitido2(){
+  digitalWrite(LED_V2,HIGH);
+  //milis
+  digitalWrite(LED_V2,LOW);
+}
+
+// Enciende el led rojo del sensor 2
+void accesoDenegado2(){
+  digitalWrite(LED_R2,HIGH);
+  //milis
+  digitalWrite(LED_R2,LOW);
+}
+
 
 // Devuelve el UID de la tarjeta
 String obtenerUID(){
