@@ -48,17 +48,19 @@ struct pt procesoD;
 void setup(){
   PT_INIT(&procesoA);
   PT_INIT(&procesoB);
+  PT_INIT(&procesoC);
 
-  Serial.begin(9600);
   
-  SPI.begin();
-  mfrc522.PCD_Init();
+  
+  //SPI.begin();
+  //mfrc522.PCD_Init();
 }
 
 // Loop
 void loop(){
   fotosensor(&procesoA);
   sensorMovimiento(&procesoB);
+  sensorDistancia(&procesoC);
 }
 
 /**
