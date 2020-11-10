@@ -68,7 +68,6 @@ void loop(){
 void fotosensor(struct pt *pt){
   PT_BEGIN(pt);
   
-  static long t = 0;
   int valor;
   const int valorLimite = 200;
 
@@ -81,8 +80,7 @@ void fotosensor(struct pt *pt){
     if(valor < valorLimite)
       digitalWrite(LED_PATIO, HIGH);
     
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 200));
+    delayMillis(&pt, 200);
 
     PT_YIELD(pt);
   }
@@ -101,7 +99,6 @@ void sensorDistancia(struct pt *pt){
  */
 void sensorMovimiento(struct pt *pt) {
   PT_BEGIN(pt);
-  static long  t = 0;
   bool pirState = false;
 
   pinMode(PIR, INPUT);
@@ -115,9 +112,8 @@ void sensorMovimiento(struct pt *pt) {
     else
       digitalWrite(LED_BANO, LOW);
     
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 200));
-    
+    delayMillis(&pt, 200);
+
     PT_YIELD(pt);
   }
   PT_END(pt);
@@ -125,6 +121,15 @@ void sensorMovimiento(struct pt *pt) {
 
 void sensorTemperatura(struct pt *pt){
 
+}
+
+/**
+ * Delay Personalizado.
+ * Realiza la función del delay adaptado al uso de protothreads
+ */
+void delayMillis(struct pt *pt, int delay){
+  static long t = millis();
+  PT_WAIT_WHILE(pt,(millis()-t) < delay);
 }
 
 /***********************/
