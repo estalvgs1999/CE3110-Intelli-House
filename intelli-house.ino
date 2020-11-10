@@ -8,8 +8,8 @@
 
 // Sensores
 #define LDR A0
-#define HC_TRIGGER 48
-#define HC_ECHO 49
+#define HC_TRIGGER 32
+#define HC_ECHO 33
 #define PIR 50
 #define DHT 53
 #define RST_PIN  4
@@ -50,7 +50,7 @@ void setup(){
   PT_INIT(&procesoB);
   PT_INIT(&procesoC);
 
-  
+  Serial.begin(9600);
   
   //SPI.begin();
   //mfrc522.PCD_Init();
@@ -104,29 +104,32 @@ void fotosensor(struct pt *pt){
  */
 void sensorDistancia(struct pt *pt){
   PT_BEGIN(pt);
-  static long t = 0;
-  const int delay_us = 10 // 10 microsegundos  
+  const int delay_us = 10; // 10 microsegundos  
+  const int limite = 15; // 15 cm
   int distancia;
   int tiempo;
+  Servo servo;
 
   pinMode(HC_ECHO, INPUT);
   pinMode(HC_TRIGGER, OUTPUT);
-  Serial.begin(9600);
-
+  servo.attach(SERVO_GARAGE);
+  
   while(true){
-
     digitalWrite(HC_TRIGGER, HIGH);
-    t = millis();
-    PT_WAIT_WHILE(pt,(millis()-t) < delay_us);
+    //
     digitalWrite(HC_TRIGGER, LOW);
 
     tiempo = pulseIn(HC_ECHO, HIGH);
-    duracion = duracion * 0.034/2;
+    distancia = tiempo * 0.034/2;
+
+    if(distancia < limite)
+      servo.write(90);
+      
 
     Serial.print("Distancia = ");
     Serial.print(distancia);
     Serial.println(" cm");
-
+    
     PT_YIELD(pt);
   }
 
