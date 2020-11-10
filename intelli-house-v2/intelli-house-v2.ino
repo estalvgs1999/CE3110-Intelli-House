@@ -158,7 +158,36 @@ void RFID1(struct pt *pt){
 
   PT_END(pt);
 };
-)
+
+void RFID2(struct pt *pt){
+  PT_BEGIN(pt);
+  static long t = 0;
+
+  while (true){
+    // Revisamos si hay nuevas tarjetas  presentes  
+  if ( mfrc522.PICC_IsNewCardPresent())
+  {  
+    
+    if ( mfrc522.PICC_ReadCardSerial()){
+      
+      lcd.clear();
+      lcd.print("READING CARD...");
+      delay(2000);
+
+      String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
+      
+      if(verificarTarjeta(uid))
+        accesoPermitido();
+      else
+        accesoDenegado(); 
+    }
+  }  
+
+    PT_YIELD(pt);
+  }
+
+  PT_END(pt);
+};
 
 // Enciende el led azul e imprime un mensaje en el lcd
 void accesoPermitido(){
