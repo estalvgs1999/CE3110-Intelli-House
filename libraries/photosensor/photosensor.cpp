@@ -1,6 +1,6 @@
 #include "photosensor.h"
 
-int _delay = 1000;
+int _period = 1000;
 unsigned long t = 0;
 
 /**
@@ -51,6 +51,7 @@ void Photosensor::run(){
     turnOn();
   
   // delay
-  t = millis();
-  while(millis() < t + _delay){}
+  if(millis() > t + _period){
+    t = millis();
+  }
 }
