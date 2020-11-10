@@ -32,7 +32,7 @@
 //Bases de datos
 String baseDatos[] = {"C7 52 6B 63","A9 A0 8B C1"};
 int bdSize = sizeof(baseDatos)/sizeof(String);
-String baseDatos2[] = {"C7 52 6B 63","A9 A0 8B C1"};
+String baseDatos2[] = {"C7 52 6B 63","A9 A0 8B C1","96 0E 03 4B","D0 54 39 45"};
 int bdSize2 = sizeof(baseDatos2)/sizeof(String);
 
 // Creación de Objetos
@@ -127,6 +127,7 @@ void sensorDistancia(struct pt *pt){
     PT_WAIT_WHILE(pt,(micros()-t) < 5);
     digitalWrite(HC_TRIGGER, HIGH);
     t = micros();
+
     PT_WAIT_WHILE(pt,(micros()-t) < delay_us);
     digitalWrite(HC_TRIGGER, LOW);
 
