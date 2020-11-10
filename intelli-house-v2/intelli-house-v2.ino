@@ -29,13 +29,14 @@
 #define LED_R2 24
 #define LED_V2 25
 
-//Base de datos
+//Bases de datos
 String baseDatos[] = {"C7 52 6B 63","A9 A0 8B C1"};
 int bdSize = sizeof(baseDatos)/sizeof(String);
+String baseDatos2[] = {"C7 52 6B 63","A9 A0 8B C1"};
+int bdSize2 = sizeof(baseDatos2)/sizeof(String);
 
-// Crear nuestros OBJETOS
+// Creación de Objetos
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // Hilos
 struct pt procesoA;
@@ -145,10 +146,6 @@ void RFID1(struct pt *pt){
     
     if ( mfrc522.PICC_ReadCardSerial()){
       
-      lcd.clear();
-      lcd.print("READING CARD...");
-      delay(2000);
-
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
       
       if(verificarTarjeta(uid))
@@ -175,16 +172,12 @@ void RFID2(struct pt *pt){
     
     if ( mfrc522.PICC_ReadCardSerial()){
       
-      lcd.clear();
-      lcd.print("READING CARD...");
-      delay(2000);
-
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
       
-      if(verificarTarjeta(uid))
-        accesoPermitido();
+      if(verificarTarjeta2(uid))
+        accesoPermitido2();
       else
-        accesoDenegado(); 
+        accesoDenegado2(); 
     }
   }  
 
@@ -194,18 +187,32 @@ void RFID2(struct pt *pt){
   PT_END(pt);
 };
 
-// Enciende el led azul e imprime un mensaje en el lcd
+// Enciende el led verde del sensor 1
 void accesoPermitido(){
-  digitalWrite(LED_A,HIGH);
+  digitalWrite(LED_V1,HIGH);
   //milis
-  digitalWrite(LED_A,LOW);
+  digitalWrite(LED_V1,LOW);
 }
 
-// Enciende el led rojo y el buzzer e imprime un mensaje en el lcd
+// Enciende el led rojo del sensor 1
 void accesoDenegado(){
-  digitalWrite(LED_R,HIGH);
+  digitalWrite(LED_R1,HIGH);
   //milis
-  digitalWrite(LED_R,LOW);
+  digitalWrite(LED_R1,LOW);
+}
+
+// Enciende el led verde del sensor 2
+void accesoPermitido2(){
+  digitalWrite(LED_V2,HIGH);
+  //milis
+  digitalWrite(LED_V2,LOW);
+}
+
+// Enciende el led rojo del sensor 2
+void accesoDenegado2(){
+  digitalWrite(LED_R2,HIGH);
+  //milis
+  digitalWrite(LED_R2,LOW);
 }
 
 // Devuelve el UID de la tarjeta
@@ -226,6 +233,16 @@ bool verificarTarjeta(String tarUid){
   
   for(int i = 0; i < bdSize; i++){
     if(tarUid.substring(1) == baseDatos[i])
+      return true;
+  }
+  return false;
+}
+
+// Verifica si la tarjeta esta en la base de datos #2
+bool verificarTarjeta2(String tarUid){
+  
+  for(int i = 0; i < bdSize; i++){
+    if(tarUid.substring(1) == baseDatos2[i])
       return true;
   }
   return false;
