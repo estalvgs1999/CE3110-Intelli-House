@@ -1,5 +1,8 @@
 #include "photosensor.h"
 
+int _delay = 1000;
+unsigned long t = 0;
+
 /**
  * Constructor
  * @param int ldr_pin
@@ -41,23 +44,13 @@ void Photosensor::turnOff(){
  * Main routine controller, reads sensor and turns 
  * on actuator if value is less than allowable value.
  */
-void Photosensor::run(struct pt *pt){
-  PT_BEGIN(pt);
-  static long t = 0;
-
-  while(true){
-    turnOff();
-    int value = readSensor();
-    Serial.println(value);
-    
-    if(value < _edgeValue){
-      turnOn();
-    }
-    
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 200));
-
-    PT_YIELD(pt);
-  }
-  PT_END(pt);
+void Photosensor::run(){
+  turnOff();
+  int value = readSensor();
+  if(value < _edgeValue)
+    turnOn();
+  
+  // delay
+  t = millis();
+  while(millis() < t + _delay){}
 }
