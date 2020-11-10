@@ -29,11 +29,13 @@
 #define LED_R2 24
 #define LED_V2 25
 
-//Base de datos
+//Bases de datos
 String baseDatos[] = {"C7 52 6B 63","A9 A0 8B C1"};
 int bdSize = sizeof(baseDatos)/sizeof(String);
+String baseDatos2[] = {"C7 52 6B 63","A9 A0 8B C1"};
+int bdSize2 = sizeof(baseDatos2)/sizeof(String);
 
-// Crear nuestros OBJETOS
+// Creación de Objetos
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 // Hilos
@@ -172,7 +174,7 @@ void RFID2(struct pt *pt){
       
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
       
-      if(verificarTarjeta(uid))
+      if(verificarTarjeta2(uid))
         accesoPermitido2();
       else
         accesoDenegado2(); 
@@ -213,7 +215,6 @@ void accesoDenegado2(){
   digitalWrite(LED_R2,LOW);
 }
 
-
 // Devuelve el UID de la tarjeta
 String obtenerUID(){
   String uid = "";
@@ -232,6 +233,16 @@ bool verificarTarjeta(String tarUid){
   
   for(int i = 0; i < bdSize; i++){
     if(tarUid.substring(1) == baseDatos[i])
+      return true;
+  }
+  return false;
+}
+
+// Verifica si la tarjeta esta en la base de datos #2
+bool verificarTarjeta2(String tarUid){
+  
+  for(int i = 0; i < bdSize; i++){
+    if(tarUid.substring(1) == baseDatos2[i])
       return true;
   }
   return false;
