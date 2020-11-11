@@ -13,7 +13,7 @@ class Temperature{
     int _actuator;
     byte _tmp = 0;
     byte _hum = 0;
-    int _tmpLimit = 25;
+    int _tmpLimit = 90;
     
     void turnOn();
     void turnOff();
