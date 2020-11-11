@@ -1,17 +1,14 @@
 #include "photosensor.h"
 
-int _period = 1000;
-unsigned long t_ps = 0;
-
 /**
  * Constructor
  * @param int ldr_pin
- * @param int actuator_pin
+ * @param int led_pin
  */
-Photosensor::Photosensor(int ldr_pin, int actuator_pin){
+Photosensor::Photosensor(int ldr_pin, int led_pin){
   _ldr = ldr_pin;
-  _actuator = actuator_pin;
-  pinMode(_actuator, OUTPUT);
+  _led = led_pin;
+  pinMode(_led, OUTPUT);
 }
 
 /**
@@ -31,18 +28,18 @@ int Photosensor::readSensor(){
   return value;
 }
 
-// Actuator events, turn digital output on and off
+// led events, turn digital output on and off
 void Photosensor::turnOn(){
-  digitalWrite(_actuator, HIGH);
+  digitalWrite(_led, HIGH);
 }
 
 void Photosensor::turnOff(){
-  digitalWrite(_actuator, LOW);
+  digitalWrite(_led, LOW);
 }
 
 /**
  * Main routine controller, reads sensor and turns 
- * on actuator if value is less than allowable value.
+ * on led if value is less than allowable value.
  */
 void Photosensor::run(){
   turnOff();
