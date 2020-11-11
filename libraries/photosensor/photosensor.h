@@ -10,9 +10,11 @@
 class Photosensor{
     
   private:
-    int _ldr;
-    int _actuator;
-    int _edgeValue = 200;
+    int _ldr;                 // the pin that the sensor is atteched to
+    int _led;                 // the pin that the LED is atteched to
+    int _edgeValue = 200;     // edge value to turn on LED
+    int _period = 1000;       // delay time period
+    unsigned long t_ps = 0;   // current time measure
 
     int readSensor();
     void turnOn();

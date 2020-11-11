@@ -2,7 +2,6 @@
 #define distancesensor_h
 
 #include "Arduino.h"
-#include <Servo.h>
 
 /**
  * Library that allows the management of the hc-sr04 ultrasonic sensor 
@@ -13,17 +12,15 @@ class DistanceSensor{
   private:
     int _trig;
     int _echo;
-    int _limit = 20;
-    Servo _servo;
-    
-    void moveServo(int angle);
-    void startTimer();
-    bool isTimerReady(int time);
+    int _limit = 10;
+    long _time;
+    int _distance;
+
     long calculateDistance(int time);
 
   public:
-    DistanceSensor(int trigPin, int echoPin, int servo);
-    void run();
+    DistanceSensor(int trigPin, int echoPin);
+    bool run();
 };
 
 #endif

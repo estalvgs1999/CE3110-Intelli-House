@@ -6,7 +6,7 @@
  * @param int actuatorPin
  */
 Temperature::Temperature(int tmpPin, int actuatorPin){
-  _tmp = tmpPin;
+  _pin = tmpPin;
   _actuator = actuatorPin;
   pinMode(_actuator,OUTPUT);
 }
@@ -36,26 +36,18 @@ void Temperature::setTemperatureLimit(int newLimit){
  * read value exceeds the limit temperature an actuator will turn 
  * on to activate a cooling mechanism.
  */
-void Temperature::run(struct pt *pt){
-  PT_BEGIN(pt);
-  static long t = 0;
-  byte temp = 0;
-  byte hum = 0;
-  SimpleDHT11 sensor(_tmp);
-
-  while(true){
+void Temperature::run(){
+  SimpleDHT11 _sensor(_pin);
     
-    sensor.read(&temp, &hum, NULL);
-    if(int(temp) > _tmpLimit){
-      turnOn();
-    }else{
-      turnOff();
-    }
+  _sensor.read(&_tmp, &_hum, NULL);
+  Serial.println(int(_tmp));
+  Serial.println(int(_hum));
 
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 2000));
-    
-    PT_YIELD(pt);
+  if(int(_hum) >= 80){
+    turnOn();
+  }else{
+    turnOff();
   }
-  PT_END(pt);
+
+  delay(200);
 }

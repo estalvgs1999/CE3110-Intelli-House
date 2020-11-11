@@ -3,23 +3,24 @@
 
 #include "Arduino.h"
 #include <SimpleDHT.h>
-#include <pt.h>
 
 /**
  * DHT11 Humidity and temperature sensor handler.
  */
 class Temperature{
   private:
-    int _tmp;
+    int _pin;
     int _actuator;
-    int _tmpLimit;
+    byte _tmp = 0;
+    byte _hum = 0;
+    int _tmpLimit = 25;
     
     void turnOn();
     void turnOff();
 
   public:
     Temperature(int tmpPin, int actuatorPin);
-    void run(struct pt *pt);
+    void run();
     void setTemperatureLimit(int limit);
 };
 

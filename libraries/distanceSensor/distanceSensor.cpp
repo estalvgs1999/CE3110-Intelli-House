@@ -1,50 +1,16 @@
 #include "distanceSensor.h"
 
-unsigned long t_ds = 0;
-int timerTriggerHigh = 10;
-int timerLowHIGH = 2;
-int timerServo = 5000;  //  5 s
-
-int timeDuration, distance;
-
-// States ofan ultrasonic sensor
-enum SensorStates {
-  TRIG_LOW,
-  TRIG_HIGH,
-  ECHO_HIGH,
-  SERVO_ON
-};
-
-SensorStates _sensorState = TRIG_LOW;
-
-/**
- *
- */
-void DistanceSensor::startTimer(){
-  t_ds = millis();
-}
-
-/**
- *
- */
-bool DistanceSensor::isTimerReady(int time){
-  return (millis() - t_ds) < time;
-}
-
-
 /**
  * Constructor
  * @param int trigPin
  * @param int echoPin
- * @param int servo
  */
-DistanceSensor::DistanceSensor(int trigPin, int echoPin, int servo){
+DistanceSensor::DistanceSensor(int trigPin, int echoPin){
   _trig = trigPin;
   _echo = echoPin;
 
   pinMode(_trig,OUTPUT);
   pinMode(_echo,INPUT);
-  _servo.attach(servo);
 }
 
 /**
@@ -59,69 +25,23 @@ long DistanceSensor::calculateDistance(int time){
 }
 
 /**
- * Writes a value to the servo, controlling the shaft accordingly.
- * @param int angle
- */
-void DistanceSensor::moveServo(int angle){
-  if(angle < 0 || angle > 180)
-    return;
-  _servo.write(angle);
-}
-
-/**
  * Sensor main routine. Check if there is an object in a range of 
  * distance, and if there is it activates a servo.
  */
-void DistanceSensor::run(){
-  switch (_sensorState)
-  {
-    // Start with LOW pulse to ensure a clean HIGH pulse
-    case TRIG_LOW:
-      digitalWrite(_trig, LOW);
-      startTimer();
-      if(isTimerReady(timerLowHIGH))
-        _sensorState = TRIG_HIGH;
-      break;
+bool DistanceSensor::run(){
+    // Clears the trigPin condition
+  digitalWrite(_trig, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+  digitalWrite(_trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(_trig, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  _time = pulseIn(_echo, HIGH);
+  _distance = calculateDistance(_time);
+  
+  delay(100);
 
-    // Triggered a HIGH pulse of 10 microseconds
-    case TRIG_HIGH:
-      digitalWrite(_trig, HIGH);
-      startTimer();
-      if (isTimerReady(timerTriggerHigh))
-        _sensorState = ECHO_HIGH;
-      break;    
-    
-    // Measures the time that ping took to return to the receiver
-    case ECHO_HIGH:
-      digitalWrite(_trig, LOW);
-      timeDuration = pulseIn(_echo, HIGH);
-      /*
-           distance = time * speed of sound
-           speed of sound is 340 m/s => 0.034 cm/us
-      */
-      distance = calculateDistance(timeDuration);
-      Serial.print("Distance measured is: ");
-      Serial.print(distance);
-      Serial.println(" cm");
-      
-      if(distance < _limit)
-        _sensorState = SERVO_ON;
-      else
-        _sensorState = TRIG_LOW;
-    
-    // Move servo
-    case SERVO_ON:
-      Serial.println("Entra al servo");
-      moveServo(90);
-      startTimer();
-      if(isTimerReady(timerServo)){
-        moveServo(0);
-        _sensorState = TRIG_LOW;
-      }
-      break;
-    
-    default:
-      break;
-  }
+  return _distance < _limit;
 }
 
