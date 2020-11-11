@@ -1,5 +1,35 @@
 #include "distanceSensor.h"
 
+unsigned long t = 0;
+int timerTriggerHigh = 10;
+int timerLowHIGH = 2;
+int  timerServo = 5000;  //  5 s
+
+// States ofan ultrasonic sensor
+enum SensorStates {
+  TRIG_LOW,
+  TRIG_HIGH,
+  ECHO_HIGH,
+  SERVO_ON
+};
+
+SensorStates _sensorState = TRIG_LOW;
+
+/**
+ *
+ */
+void DistanceSensor::startTimer(){
+  t = millis();
+}
+
+/**
+ *
+ */
+bool DistanceSensor::isTimerReady(int time){
+  return (millis() - t) < time;
+}
+
+
 /**
  * Constructor
  * @param int trigPin
@@ -13,6 +43,7 @@ DistanceSensor::DistanceSensor(int trigPin, int echoPin, int servo){
   pinMode(_trig,OUTPUT);
   pinMode(_echo,INPUT);
   _servo.attach(servo);
+  Serial.begin(9600);
 }
 
 /**
@@ -40,30 +71,55 @@ void DistanceSensor::moveServo(int angle){
  * Sensor main routine. Check if there is an object in a range of 
  * distance, and if there is it activates a servo.
  */
-void DistanceSensor::run(struct pt *pt){
-  PT_BEGIN(pt);
-  static long t = 0;
-  long time = 0;
-  int distance = 0;
+void DistanceSensor::run(){
+  switch (switch_on)
+  {
+    // Start with LOW pulse to ensure a clean HIGH pulse
+    case TRIG_LOW:
+      digitalWrite(_trig, LOW);
+      startTimer();
+      if(isTimerReady(timerLowHIGH))
+        _sensorState = TRIG_HIGH;
+      break;
 
-  while(true){
-    // Trigger pulse
-    digitalWrite(_trig, HIGH);
-    t = millis();
-    PT_WAIT_WHILE(pt,((millis()-t) < 200));
-    digitalWrite(_trig, LOW);
-    // Time taken by pulse to leave and return back
-    time = pulseIn(_echo, HIGH);
+    // Triggered a HIGH pulse of 10 microseconds
+    case TRIG_HIGH:
+      digitalWrite(_trig, HIGH);
+      startTimer();
+      if (isTimerReady(timerTriggerHigh))
+        _sensorState = ECHO_HIGH;
+      break;    
     
-    // Check if there is an object at the desired distance
-    distance = calculateDistance(time);
-    if(distance < 100){
+    // Measures the time that ping took to return to the receiver
+    case ECHO_HIGH:
+      digitalWrite(trigPin, LOW);
+      timeDuration = pulseIn(echoPin, HIGH);
+      /*
+           distance = time * speed of sound
+           speed of sound is 340 m/s => 0.034 cm/us
+      */
+      int distance = calculateDistance(timeDuration);
+      Serial.print("Distance measured is: ");
+      Serial.print(distance);
+      Serial.println(" cm");
+      
+      if(distance < _limit)
+        _sensorState = SERVO_ON
+      else
+        _sensorState = TRIG_LOW;
+    
+    // Move servo
+    case SERVO_ON:
       moveServo(90);
-    } else{
-      moveServo(0);
-    }
-    PT_YIELD(pt);
+      startTimer();
+      if(isTimerReady(timerServo)){
+        moveServo(0);
+        _sensorState = TRIG_LOW;
+      }
+      break;
+    
+    default:
+      break;
   }
-  PT_END(pt);
 }
 
