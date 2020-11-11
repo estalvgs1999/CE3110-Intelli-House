@@ -43,7 +43,7 @@ void Temperature::run(){
   Serial.println(int(_tmp));
   Serial.println(int(_hum));
 
-  if(int(_hum) >= 80){
+  if(int(_hum) >= _tmpLimit){
     turnOn();
   }else{
     turnOff();
