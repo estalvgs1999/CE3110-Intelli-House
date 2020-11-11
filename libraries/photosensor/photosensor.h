@@ -2,7 +2,6 @@
 #define photosensor_h
 
 #include "Arduino.h"
-#include <pt.h>
 
 /**
  * Photo Sensor is a library that wraps the operation of the 
@@ -21,7 +20,7 @@ class Photosensor{
     
   public:
     Photosensor(int ldr_pin, int actuator_pin);
-    void run(struct pt *pt);
+    void run();
     void setEdgeValue(int value);
 
     
