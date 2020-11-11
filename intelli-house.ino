@@ -1,5 +1,7 @@
+#include <distanceSensor.h>
+#include <photosensor.h>
+
 //Bibliotecas
-#include <Servo.h>
 #include <SimpleDHT.h>
 #include <pt.h>
 #include <Wire.h>
@@ -32,85 +34,22 @@ int bdSize2 = sizeof(baseDatos2)/sizeof(String);
 
 // Creación de Objetos
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-Servo servoGarage;
 SimpleDHT11 Sensor(DHT);
-
-
-// Variables globales
-volatile unsigned long LastPulseTime;  
-volatile bool servoGarageState;
-
-// Hilos
-struct pt procesoA;
-struct pt procesoB;
-struct pt procesoC;
-struct pt procesoD;
-
-/**
- * Retorno del pulso
- * ---------------------------------------
- * Sustituye la función síncrosa pulseIn()
- */
-void EchoPinISR(){
-  static unsigned long t;
-
-  if(digitalRead(HC_ECHO))
-    t = micros();
-  else
-    LastPulseTime = micros() - t;
-}
+Photosensor photosensor(LDR, LED_PATIO);
+DistanceSensor distanceSensor(HC_TRIGGER,HC_ECHO,SERVO_GARAGE);
 
 // Setup
 void setup(){
-  PT_INIT(&procesoA);
-  PT_INIT(&procesoB);
-  PT_INIT(&procesoC);
-  PT_INIT(&procesoD);
-
+  
   Serial.begin(9600);
-  //SPI.begin();
-  //mfrc522.PCD_Init();
 }
 
 // Loop
 void loop(){
-  fotosensor(&procesoA);
-  sensorMovimiento(&procesoB);
-  sensorDistancia(&procesoC);
-  servoGarageRunTime(&procesoD);
+ photosensor.run();
+ distanceSensor.run();
 }
 
-/**
- * Sensor LDR
- * -----------------------------------------------
- * Si el valor de la lectura es menor que el de un 
- * valor límite (indica oscuridad) enciende la 
- * iluminación. 
- */
-void fotosensor(struct pt *pt){
-  PT_BEGIN(pt);
-  static long t = 0;
-
-  int valor;
-  const int delay = 200;
-  const int valorLimite = 200;
-
-  pinMode(LED_PATIO, HIGH);
-
-  while(true){
-    digitalWrite(LED_PATIO, LOW);
-    
-    valor = analogRead(LDR);
-    if(valor < valorLimite)
-      digitalWrite(LED_PATIO, HIGH);
-    
-    t = millis();
-    PT_WAIT_WHILE(pt,(millis()-t) < delay);
-
-    PT_YIELD(pt);
-  }
-  PT_END(pt);
-}
 
 /**
  * Sensor Ultrasónico HCSR04
@@ -129,7 +68,6 @@ void sensorDistancia(struct pt *pt){
   
   pinMode(HC_ECHO, INPUT);
   pinMode(HC_TRIGGER, OUTPUT);
-  attachInterrupt(0, EchoPinISR, CHANGE); // Pin 2
   
   while(true){
 
@@ -141,49 +79,20 @@ void sensorDistancia(struct pt *pt){
     PT_WAIT_WHILE(pt,(micros()-t) < 10);
     digitalWrite(HC_TRIGGER, LOW);
 
-    tiempo = LastPulseTime;
+    tiempo = 1;
     distancia = tiempo/59;
     
     Serial.print("Distancia = ");
     Serial.print(distancia);
     Serial.println(" cm");
     
-    if(distancia < limite)
-      servoGarageState = true;
-    else
-      servoGarageState = false;      
-
+ 
     PT_YIELD(pt);
   }
 
   PT_END(pt);
 }
 
-/**
- * Servo del patio
- * -----------------------------------------------
- * El sensor mide la distancia en cm.
- * Cuando la distancia es menor a una distancia d
- * se activa una bandera que mueve el sensor.
- */
-void servoGarageRunTime(struct pt *pt){
-  PT_BEGIN(pt);
-  static long t = 0;
-  const int _delay = 5000;
-  servoGarage.attach(SERVO_GARAGE);
-  servoGarage.write(120);
-
-  while(true){
-    if(servoGarageState){
-      servoGarage.write(90);
-      t = millis();
-      PT_WAIT_WHILE(pt,(millis()-t) < _delay);
-      servoGarage.write(120);
-    }
-    PT_YIELD(pt);
-  }
-  PT_END(pt);
-}
 
 /**
  * Sensor PIR

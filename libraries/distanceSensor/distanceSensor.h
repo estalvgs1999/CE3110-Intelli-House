@@ -13,11 +13,12 @@ class DistanceSensor{
   private:
     int _trig;
     int _echo;
+    int _limit = 20;
     Servo _servo;
     
     void moveServo(int angle);
     void startTimer();
-    void isTimerReady(int time);
+    bool isTimerReady(int time);
     long calculateDistance(int time);
 
   public:
