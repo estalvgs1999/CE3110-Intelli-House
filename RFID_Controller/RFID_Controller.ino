@@ -3,6 +3,7 @@
 
  */
 
+// Bibliotecas
 #include <Wire.h>
 #include <SPI.h>
 #include <MFRC522.h>
@@ -24,8 +25,7 @@ int bdSize = sizeof(baseDatos)/sizeof(String);
 
 // Crear nuestros OBJETOS
 MFRC522 mfrc522(SS_PIN, RST_PIN); //Creamos el objeto para el RC522
-Servo servoPrin;
-Servo servoRoom;
+Servo servoPrin, servoRoom;
 
 void setup() {
 
@@ -46,9 +46,7 @@ void setup() {
 void loop()
 {
   // Revisamos si hay nuevas tarjetas  presentes  
-  if ( mfrc522.PICC_IsNewCardPresent())
-  {  
-    
+  if ( mfrc522.PICC_IsNewCardPresent()){  
     if ( mfrc522.PICC_ReadCardSerial()){
 
       String uid = obtenerUID(); // Obtenemos el UID de la tarjeta
@@ -57,12 +55,12 @@ void loop()
         if(uid.substring(1) == "C7 52 6B 63" || uid.substring(1) =="A9 A0 8B C1"){
           accesoPermitido2();
           return;
-          }
+        }
         if(uid.substring(1) == "D0 54 39 45" || uid.substring(1) =="96 0E 03 4B"){
           accesoPermitido();
           return;
-          }
         }
+     }
     }
   } 
 }
